@@ -135,6 +135,7 @@ public class Utilities {
 					break;
 			case 8: Utilities.editPhoneNumber(recordToBeEdited);
 					break;
+			default: System.exit(0);
 		}
 	}
 	
@@ -285,13 +286,50 @@ public class Utilities {
 		System.out.println(recordsPerState);
 	}
 	
+	//to sort all the records in every address book by name and print it
 	public static void sortAddressBooksByName()
 	{
 		for (Entry<String, ArrayList<Record>> book : AddressBookSystem.addressBookStore.entrySet())
 		{
 			ArrayList<Record> recordListToSort = book.getValue();
 			
-			Collections.sort(recordListToSort,(recordObj1,recordObj2) -> (recordObj1.firstName+recordObj1.lastName).compareTo(recordObj2.firstName+recordObj2.lastName));
+			Collections.sort(recordListToSort,(recordObj1, recordObj2) -> (recordObj1.firstName+recordObj1.lastName).compareTo(recordObj2.firstName+recordObj2.lastName));
+			System.out.println(recordListToSort);
+		}
+	}
+	
+	//to sort all the records in every address book by city name
+	public static void sortByCity()
+	{
+		for (Entry<String, ArrayList<Record>> book : AddressBookSystem.addressBookStore.entrySet())
+		{
+			ArrayList<Record> recordListToSort = book.getValue();
+			
+			Collections.sort(recordListToSort,(recordObj1, recordObj2) -> (recordObj1.city).compareTo(recordObj2.city));
+			System.out.println(recordListToSort);
+		}
+	}
+	
+	//to sort all the records in every address book by state name 
+	public static void sortByState()
+	{
+		for (Entry<String, ArrayList<Record>> book : AddressBookSystem.addressBookStore.entrySet())
+		{
+			ArrayList<Record> recordListToSort = book.getValue();
+			
+			Collections.sort(recordListToSort,(recordObj1, recordObj2) -> (recordObj1.state).compareTo(recordObj2.state));
+			System.out.println(recordListToSort);
+		}
+	}
+	
+	//to sort all the records in every address book by zip code
+	public static void sortByZip()
+	{
+		for (Entry<String, ArrayList<Record>> book : AddressBookSystem.addressBookStore.entrySet())
+		{
+			ArrayList<Record> recordListToSort = book.getValue();
+			
+			Collections.sort(recordListToSort,(recordObj1, recordObj2) -> (recordObj1.zip < recordObj2.zip) ? -1 : (recordObj1.zip > recordObj2.zip) ? 1 : 0);
 			System.out.println(recordListToSort);
 		}
 	}
