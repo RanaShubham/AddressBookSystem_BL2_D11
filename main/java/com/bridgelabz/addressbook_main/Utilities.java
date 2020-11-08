@@ -415,8 +415,7 @@ public class Utilities {
 	public static long readAddressbookData(String bookName) 
 	{
 		List<Record> book = new ArrayList<>();
-		book = new AddressBookFileIOService().readData(bookName);
-		System.out.println(book);
+		new AddressBookFileIOService().readData(bookName);
 		return book.size();
 	}
 }

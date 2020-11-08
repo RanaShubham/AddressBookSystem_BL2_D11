@@ -1,13 +1,21 @@
 package com.bridgelabz.addressbook_main;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 
-import com.bridgelabz.employepayrollservice.EmployeePayrollData;
+import com.opencsv.CSVWriter;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+
 
 public class AddressBookFileIOService 
 {	
@@ -18,16 +26,24 @@ public class AddressBookFileIOService
 	 */
 	public void writeData(ArrayList<Record> book, String bookName) 
 	{
-		StringBuffer bookBuffer = new StringBuffer();
-		book.forEach(record -> {
-			String recordString = record.toString().concat("\n");
-			bookBuffer.append(recordString);
-		});
-		
+		final String MY_FILE = "./"+bookName+".csv";
 		try {
-			Files.write(Paths.get(bookName+".txt"), bookBuffer.toString().getBytes());
+			Writer writer = Files.newBufferedWriter(Paths.get(MY_FILE));
+			StatefulBeanToCsv<Record> beanToCsv = new StatefulBeanToCsvBuilder<Record>(writer)
+												  	  .withQuotechar(CSVWriter.NO_ESCAPE_CHARACTER)
+												  	  .build();
+			try 
+			{
+				beanToCsv.write(book);
+				writer.close();
+			} catch (CsvDataTypeMismatchException e) {
+				e.printStackTrace();
+			} catch (CsvRequiredFieldEmptyException e) {
+				e.printStackTrace();
+			}
+			
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("File could not be read.");
 		}
 	}
 	
@@ -36,43 +52,33 @@ public class AddressBookFileIOService
 	 * @param Name of the file (without extension).
 	 * @return List of Record objects.
 	 */
-	public List<Record> readData(String bookName) 
+	public void readData(String bookName) 
 	{
-		List<Record> addressbook = new ArrayList<>();
-		try {
-			Files.lines(new File(bookName+".txt").toPath()).map(record -> record.trim().split(" "))
-				 .forEach(recordLineArr -> 
-				 {
-					 Record record = dataToObject(recordLineArr);
-					 addressbook.add(record);
-				 });
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return addressbook;
-	}
-
-	/**
-	 * Helper method to convert each line of address book into Record object.
-	 * @param String array of each word in address book.
-	 * @return Record object.
-	 */
-	private Record dataToObject(String[] recordLineArr) 
-	{
-		List<String> data = new ArrayList<>();
-		for(String cell : recordLineArr )
-		{
-			String [] processedData = cell.trim().split("=");
-			data.add(processedData[1]);
-		}
+		final String MY_FILE = "./"+bookName+".csv";
 		
-		return new Record(data.get(0),
-						data.get(1),
-						data.get(2),
-						data.get(3),
-						data.get(4),
-						data.get(5),
-						Integer.parseInt(data.get(6)),
-						Long.parseLong(data.get(7)));
-	 }
+		try (Reader reader = Files.newBufferedReader(Paths.get(MY_FILE))) 
+		{
+				
+			CsvToBean<Record> csvToBean = new CsvToBeanBuilder<Record>(reader).withType(Record.class)
+											  .withIgnoreLeadingWhiteSpace(true)
+											  .build();
+			
+			Iterator<Record> recordIterator = csvToBean.iterator(); 	
+			while(recordIterator.hasNext())
+			{
+				Record record = (Record) recordIterator.next();
+				System.out.println("Name: "+record.firstName+" "+record.lastName);
+				System.out.println("Email: "+record.email);
+				System.out.println("Address: "+record.address);
+				System.out.println("City: "+record.city);
+				System.out.println("State: "+record.state);
+				System.out.println("Phone number: "+record.phoneNumber);
+				System.out.println("PIN: "+record.zip);
+			}
+			
+			reader.close();
+		} catch (IOException e) {
+			System.out.println("File not found.");
+		}
+	}
 }

@@ -1,16 +1,29 @@
 package com.bridgelabz.addressbook_main;
 
+import com.opencsv.bean.CsvBindByName;
+
 public class Record {
 
+	@CsvBindByName(column = "1.FIRST_NAME")
 	String firstName;
+	@CsvBindByName(column = "2.LAST_NAME")
 	String lastName;
+	@CsvBindByName(column = "3.HOME_ADDRESS")
 	String address;
+	@CsvBindByName(column = "4.CITY")
 	String city;
+	@CsvBindByName(column = "5.STATE")
 	String state;
+	@CsvBindByName(column = "6.EMAIL")
 	String email;
+	@CsvBindByName(column = "7.PIN")
 	int zip;
+	@CsvBindByName(column = "8.PHONE_NUMBER")
 	long phoneNumber;
 	
+	//Default constructor for POJO class is compulsory to read data through an iterator.
+	public Record()
+	{}
 	
 	public Record (String firstname, String lastName, String address, String city, String state, String email, int zip, long phoneNumber) 
 	{
@@ -31,17 +44,11 @@ public class Record {
 	 */
 	public boolean equals(Record record)
 	{
-		try {
 
 			if (this.firstName.equals(record.firstName) && this.lastName.equals(record.lastName))
 				return true;
 			else
 				return false;
-		
-		} catch (NullPointerException e) {
-			System.out.println("No such record");
-			return false;
-		}
 	}
 
 	
