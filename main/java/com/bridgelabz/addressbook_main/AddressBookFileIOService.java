@@ -11,26 +11,36 @@ import com.bridgelabz.employepayrollservice.EmployeePayrollData;
 
 public class AddressBookFileIOService 
 {	
+	/**
+	 * Writes an address book's data to a file.
+	 * @param List of Record objects, address book.
+	 * @param Name of the book where data is to written.
+	 */
 	public void writeData(ArrayList<Record> book, String bookName) 
 	{
-		StringBuffer empBuffer = new StringBuffer();
+		StringBuffer bookBuffer = new StringBuffer();
 		book.forEach(record -> {
 			String recordString = record.toString().concat("\n");
-			empBuffer.append(recordString);
+			bookBuffer.append(recordString);
 		});
 		
 		try {
-			Files.write(Paths.get(bookName), empBuffer.toString().getBytes());
+			Files.write(Paths.get(bookName+".txt"), bookBuffer.toString().getBytes());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	/**
+	 * Reads address book data from a file.
+	 * @param Name of the file (without extension).
+	 * @return List of Record objects.
+	 */
 	public List<Record> readData(String bookName) 
 	{
 		List<Record> addressbook = new ArrayList<>();
 		try {
-			Files.lines(new File(bookName).toPath()).map(record -> record.trim().split(" "))
+			Files.lines(new File(bookName+".txt").toPath()).map(record -> record.trim().split(" "))
 				 .forEach(recordLineArr -> 
 				 {
 					 Record record = dataToObject(recordLineArr);
@@ -42,6 +52,11 @@ public class AddressBookFileIOService
 		return addressbook;
 	}
 
+	/**
+	 * Helper method to convert each line of address book into Record object.
+	 * @param String array of each word in address book.
+	 * @return Record object.
+	 */
 	private Record dataToObject(String[] recordLineArr) 
 	{
 		List<String> data = new ArrayList<>();
