@@ -1,5 +1,7 @@
 package com.bridgelabz.addressbook_main;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -7,7 +9,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -19,6 +25,8 @@ import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 
 public class AddressBookFileIOService 
 {	
+	private Gson gson;
+
 	/**
 	 * Writes an address book's data to a file.
 	 * @param List of Record objects, address book.
@@ -26,22 +34,12 @@ public class AddressBookFileIOService
 	 */
 	public void writeData(ArrayList<Record> book, String bookName) 
 	{
-		final String MY_FILE = "./"+bookName+".csv";
+		final String MY_FILE = "./"+bookName+".json";
 		try {
 			Writer writer = Files.newBufferedWriter(Paths.get(MY_FILE));
-			StatefulBeanToCsv<Record> beanToCsv = new StatefulBeanToCsvBuilder<Record>(writer)
-												  	  .withQuotechar(CSVWriter.NO_ESCAPE_CHARACTER)
-												  	  .build();
-			try 
-			{
-				beanToCsv.write(book);
-				writer.close();
-			} catch (CsvDataTypeMismatchException e) {
-				e.printStackTrace();
-			} catch (CsvRequiredFieldEmptyException e) {
-				e.printStackTrace();
-			}
-			
+			gson = new Gson();
+			gson.toJson(book, writer);
+			writer.close();
 		} catch (IOException e) {
 			System.out.println("File could not be read.");
 		}
@@ -54,31 +52,16 @@ public class AddressBookFileIOService
 	 */
 	public void readData(String bookName) 
 	{
-		final String MY_FILE = "./"+bookName+".csv";
-		
-		try (Reader reader = Files.newBufferedReader(Paths.get(MY_FILE))) 
-		{
-				
-			CsvToBean<Record> csvToBean = new CsvToBeanBuilder<Record>(reader).withType(Record.class)
-											  .withIgnoreLeadingWhiteSpace(true)
-											  .build();
-			
-			Iterator<Record> recordIterator = csvToBean.iterator(); 	
-			while(recordIterator.hasNext())
-			{
-				Record record = (Record) recordIterator.next();
-				System.out.println("Name: "+record.firstName+" "+record.lastName);
-				System.out.println("Email: "+record.email);
-				System.out.println("Address: "+record.address);
-				System.out.println("City: "+record.city);
-				System.out.println("State: "+record.state);
-				System.out.println("Phone number: "+record.phoneNumber);
-				System.out.println("PIN: "+record.zip);
-			}
-			
+		final String MY_FILE = "./"+bookName+".json";
+		try {
+			Reader reader = Files.newBufferedReader(Paths.get(MY_FILE));
+			@SuppressWarnings("serial")
+			List<Record> users = new Gson().fromJson(reader, new TypeToken<List<Record>>() {}.getType());
+			users.forEach(System.out::println);
 			reader.close();
 		} catch (IOException e) {
-			System.out.println("File not found.");
+			System.out.println("File to be read not found.");
 		}
+		
 	}
 }
